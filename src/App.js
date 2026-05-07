@@ -2,12 +2,11 @@ import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, onValue, set, update } from "firebase/database";
 
-// 1. REPLACE THIS BLOCK with your actual Firebase config from the Firebase Console
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBYtF3DIZQcuLYxBgvHkKbo2lAHlB4Fbgo",
   authDomain: "parking-manager-992eb.firebaseapp.com",
-  databaseURL: "https://parking-manager-992eb-default-rtdb.europe-west1.firebasedatabase.app/
-:",
+  databaseURL: "https://parking-manager-992eb-default-rtdb.europe-west1.firebasedatabase.app/",
   projectId: "parking-manager-992eb",
   storageBucket: "parking-manager-992eb.firebasestorage.app",
   messagingSenderId: "798714072933",
@@ -20,7 +19,7 @@ const db = getDatabase(app);
 
 const CAR_BRANDS = ["Hyundai", "Skoda", "Mitsubishi", "Toyota", "BMW", "Mercedes", "Peugeot", "Ford", "Volkswagen", "Kia", "Other"];
 const SLOT_COLORS = ["#e63946","#2196f3","#4caf50","#ff9800","#9c27b0","#00bcd4","#f44336","#3f51b5"];
-const PASSCODE = "2026"; // Change this to your desired door code
+const PASSCODE = "2026";
 
 // --- HELPER FUNCTIONS ---
 function timeUntil(departure) {
@@ -32,11 +31,6 @@ function timeUntil(departure) {
   if (h === 0 && m < 30) return { label: `${m}m`, urgent: true };
   if (h === 0) return { label: `${m}m`, urgent: false };
   return { label: `${h}h${m}m`, urgent: false };
-}
-
-function formatShortTime(dt) {
-  if (!dt) return "";
-  return new Date(dt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 // --- COMPONENTS ---
@@ -76,7 +70,7 @@ function SlotBox({ slot, onClick, compact = false }) {
         <div style={{ fontSize: 18, color: "#2a3050" }}>+</div>
       ) : (
         <>
-          <CarIcon color="{slot.color}" size="{compact" ? 32 : 38}/>
+          <CarIcon color={slot.color} size={compact ? 32 : 38}/>
           <div style={{ fontSize: 10, fontWeight: 700, color: "#e0e4f0", textAlign: "center" }}>{slot.owner}</div>
           {timer && (
             <div style={{
@@ -118,14 +112,12 @@ function Modal({ slot, onSave, onClose }) {
   );
 }
 
-// --- MAIN APP COMPONENT ---
 export default function GarageFloorPlan() {
   const [slots, setSlots] = useState({});
   const [editing, setEditing] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem("garage_auth") === "true");
   const [passInput, setPassInput] = useState("");
 
-  // 1. Sync with Firebase
   useEffect(() => {
     if (!isAuthenticated) return;
     const slotsRef = ref(db, "slots");
@@ -134,7 +126,6 @@ export default function GarageFloorPlan() {
       if (data) {
         setSlots(data);
       } else {
-        // Initial setup if database is empty
         const initial = {};
         for(let i=1; i<=8; i++) initial[i] = { id: i, occupied: false, owner: "", brand: "", plate: "", color: SLOT_COLORS[0], departure: "" };
         set(slotsRef, initial);
@@ -156,7 +147,7 @@ export default function GarageFloorPlan() {
     if (form) {
       update(slotRef, { ...form, occupied: true });
     } else {
-      update(slotRef, { occupied: false, owner: "", brand: "", plate: "", color: "", departure: "" });
+      update(slotRef, { occupied: false, owner: "", brand: "", plate: "", color: SLOT_COLORS[0], departure: "" });
     }
     setEditing(null);
   };
@@ -179,7 +170,6 @@ export default function GarageFloorPlan() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#080b14", color: "#e0e4f0", padding: 20, fontFamily: "sans-serif" }}>
-      
       <div style={{ maxWidth: 640, margin: "0 auto 20px", display: "flex", justifyContent: "space-between" }}>
         <h1>Garage Map</h1>
         <div style={{ textAlign: "right" }}>
@@ -187,27 +177,26 @@ export default function GarageFloorPlan() {
         </div>
       </div>
 
-      
       <div style={{ maxWidth: 640, margin: "0 auto", display: "grid", gap: 10 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <SlotBox slot="{S(3)}" onClick="{setEditing}"/>
+          <SlotBox slot={S(3)} onClick={setEditing}/>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <SlotBox slot="{S(1)}" onClick="{setEditing}" compact/>
-            <SlotBox slot="{S(2)}" onClick="{setEditing}" compact/>
+            <SlotBox slot={S(1)} onClick={setEditing} compact/>
+            <SlotBox slot={S(2)} onClick={setEditing} compact/>
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <SlotBox slot="{S(5)}" onClick="{setEditing}" compact/>
-                <SlotBox slot="{S(6)}" onClick="{setEditing}" compact/>
-                <SlotBox slot="{S(7)}" onClick="{setEditing}" compact/>
+                <SlotBox slot={S(5)} onClick={setEditing} compact/>
+                <SlotBox slot={S(6)} onClick={setEditing} compact/>
+                <SlotBox slot={S(7)} onClick={setEditing} compact/>
             </div>
-            <SlotBox slot="{S(4)}" onClick="{setEditing}"/>
+            <SlotBox slot={S(4)} onClick={setEditing}/>
         </div>
-        <SlotBox slot="{S(8)}" onClick="{setEditing}"/>
+        <SlotBox slot={S(8)} onClick={setEditing}/>
       </div>
 
-      {editing && <Modal slot="{editing}" onSave="{handleSave}" onClose="{()"> setEditing(null)} />}
+      {editing && <Modal slot={editing} onSave={handleSave} onClose={() => setEditing(null)} />}
     </div>
   );
 }
