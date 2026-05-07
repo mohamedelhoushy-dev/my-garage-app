@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, onValue, set, update } from "firebase/database";
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBYtF3DIZQcuLYxBgvHkKbo2lAHlB4Fbgo",
   authDomain: "parking-manager-992eb.firebaseapp.com",
@@ -13,7 +12,6 @@ const firebaseConfig = {
   appId: "1:798714072933:web:86d8035d04f7d4f7545b8c"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -21,19 +19,17 @@ const CAR_BRANDS = ["Hyundai", "Skoda", "Mitsubishi", "Toyota", "BMW", "Mercedes
 const SLOT_COLORS = ["#e63946","#2196f3","#4caf50","#ff9800","#9c27b0","#00bcd4","#f44336","#3f51b5"];
 const PASSCODE = "2026";
 
-// --- HELPER FUNCTIONS ---
 function timeUntil(departure) {
   if (!departure) return null;
   const diff = new Date(departure) - new Date();
   if (diff < 0) return { label: "Overdue", urgent: true };
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
-  if (h === 0 && m < 30) return { label: `${m}m`, urgent: true };
-  if (h === 0) return { label: `${m}m`, urgent: false };
-  return { label: `${h}h${m}m`, urgent: false };
+  if (h === 0 && m < 30) return { label: m + "m", urgent: true };
+  if (h === 0) return { label: m + "m", urgent: false };
+  return { label: h + "h" + m + "m", urgent: false };
 }
 
-// --- COMPONENTS ---
 function CarIcon({ color, size = 38 }) {
   return (
     <svg width={size} height={size * 0.55} viewBox="0 0 60 34" fill="none">
@@ -56,8 +52,8 @@ function SlotBox({ slot, onClick, compact = false }) {
     <div
       onClick={() => onClick(slot)}
       style={{
-        background: isEmpty ? "rgba(255,255,255,0.03)" : `${slot.color}15`,
-        border: isEmpty ? "1.5px dashed #2a3050" : `1.5px solid ${slot.color}60`,
+        background: isEmpty ? "rgba(255,255,255,0.03)" : slot.color + "15",
+        border: isEmpty ? "1.5px dashed #2a3050" : "1.5px solid " + slot.color + "60",
         borderRadius: 8, padding: compact ? "6px 8px" : "8px 10px", cursor: "pointer",
         transition: "all 0.18s", display: "flex", flexDirection: "column",
         alignItems: "center", gap: 3, position: "relative",
@@ -65,7 +61,6 @@ function SlotBox({ slot, onClick, compact = false }) {
       }}
     >
       <div style={{ position: "absolute", top: 4, left: 6, fontSize: 9, color: "#3a4060", fontWeight: 700 }}>#{slot.id}</div>
-      {slot.reserved && <div style={{ position: "absolute", top: 3, right: 5, fontSize: 8, color: "#9c27b0", fontWeight: 700 }}>RES</div>}
       {isEmpty ? (
         <div style={{ fontSize: 18, color: "#2a3050" }}>+</div>
       ) : (
@@ -143,7 +138,7 @@ export default function GarageFloorPlan() {
   };
 
   const handleSave = (id, form) => {
-    const slotRef = ref(db, `slots/${id}`);
+    const slotRef = ref(db, "slots/" + id);
     if (form) {
       update(slotRef, { ...form, occupied: true });
     } else {
